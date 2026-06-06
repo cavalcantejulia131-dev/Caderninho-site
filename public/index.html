@@ -1,1 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Caderninho da Doutora</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pk:#ec4899;--pk1:#ffe8f3;--pk2:#fecfe8;--pk3:#fba8d4;--pkd:#be185d;
+  --gold:#f59e0b;--goldl:#fde68a;--goldb:#fffbeb;
+  --mint:#34d399;--mintl:#bbf7d0;
+  --sky:#38bdf8;--skyl:#bae6fd;
+  --lav:#a78bfa;--lavl:#ddd6fe;
+  --red:#ef4444;--redl:#fee2e2;
+  --tx:#4a1230;--mu:#b87898;--soft:#d4a0b8;--wh:#fff;--bd:#fecfe8;
+  --r:16px;--sh:0 2px 12px rgba(236,72,153,.09);--sh2:0 6px 28px rgba(236,72,153,.17);
+}
+body{font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;background:#ffd6e8;color:var(--tx);min-height:100vh;overflow-x:hidden}
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
+.app{position:relative;z-index:1;display:flex;min-height:100vh}
 
+/* SIDEBAR */
+.sidebar{width:210px;flex-shrink:0;background:linear-gradient(180deg,#fff0f8,#fde8f5);border-right:1.5px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100}
+.sb-top{text-align:center;padding:20px 12px 14px;border-bottom:1.5px solid var(--bd)}
+.sb-top h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--pk);line-height:1.25;margin-top:7px}
+.sem-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#ffe0f0,#ffd6e8);border:2px solid var(--pk2);border-radius:50px;padding:4px 11px 4px 8px;margin-top:7px;cursor:pointer;transition:box-shadow .18s,transform .18s;box-shadow:0 2px 8px rgba(236,72,153,.12)}
+.sem-badge:hover{box-shadow:0 4px 14px rgba(236,72,153,.24);transform:translateY(-1px)}
+.sem-badge span{font-size:.74rem;font-weight:700;color:var(--pkd)}
+.sem-edit{display:none;padding:6px 10px 0}
+.sem-edit.open{display:block}
+.sem-edit input{width:100%;border:1.5px solid var(--pk2);border-radius:10px;padding:5px 9px;font-size:.8rem;color:var(--tx);background:white;outline:none;text-align:center;margin-bottom:5px}
+.sem-edit input:focus{border-color:var(--pk)}
+.sem-btns{display:flex;gap:5px}
+.nav-list{padding:7px;flex:1}
+.nav-item{display:flex;align-items:center;padding:9px 12px;border-radius:11px;cursor:pointer;font-size:.82rem;font-weight:500;color:var(--mu);transition:background .15s,color .15s;margin-bottom:2px;white-space:nowrap;overflow:hidden}
+.nav-item:hover{background:var(--pk1);color:var(--pkd)}
+.nav-item.active{background:linear-gradient(135deg,var(--pk2),var(--pk1));color:var(--pkd);font-weight:600}
+.sb-foot{padding:11px;font-size:.66rem;color:var(--soft);text-align:center;line-height:1.7;border-top:1.5px solid var(--bd);flex-shrink:0}
+
+/* MAIN */
+.main{flex:1;margin-left:210px;padding:24px 20px 80px;max-width:900px;width:100%}
+
+/* BOTTOM NAV */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1.5px solid var(--bd);z-index:200;padding:4px 0 calc(4px + env(safe-area-inset-bottom))}
+.bnav-inner{display:flex;overflow-x:auto;padding:0 4px;scrollbar-width:none}
+.bnav-inner::-webkit-scrollbar{display:none}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 10px;cursor:pointer;border-radius:10px;min-width:52px;flex-shrink:0;transition:background .13s}
+.bn-item.active{background:var(--pk1)}
+.bn-label{font-size:.55rem;font-weight:600;color:var(--mu)}
+.bn-item.active .bn-label{color:var(--pkd)}
+
+/* PAGES */
+.page{display:none;animation:fadeUp .3s ease both}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+
+/* PAGE HEADER */
+.page-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.65rem;font-weight:600;color:var(--pk);margin-bottom:4px}
+.page-sub{font-size:.77rem;color:var(--mu);margin-bottom:15px}
+
+/* CARDS */
+.card{background:var(--wh);border:1.5px solid var(--bd);border-radius:var(--r);padding:15px 17px;box-shadow:var(--sh)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:8px 16px;border-radius:50px;border:none;cursor:pointer;transition:transform .13s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn-pk{background:linear-gradient(135deg,var(--pk3),var(--pk));color:white;box-shadow:0 3px 12px rgba(236,72,153,.2)}
+.btn-gh{background:white;color:var(--pk);border:1.5px solid var(--bd)}
+.btn-sm{font-size:.73rem;padding:5px 12px}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+
+/* PROGRESS */
+.prog{display:flex;align-items:center;gap:10px;background:white;border:1.5px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:13px;box-shadow:var(--sh)}
+.prog-label{font-size:.73rem;font-weight:600;color:var(--mu);flex-shrink:0}
+.prog-track{flex:1;height:9px;background:var(--pk1);border-radius:99px;overflow:hidden;min-width:28px}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pk3),var(--pk));transition:width .7s ease}
+.prog-pct{font-size:.83rem;font-weight:700;color:var(--pk);flex-shrink:0;min-width:30px;text-align:right}
+
+/* SECTION TITLE */
+.sec-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--pk);margin:14px 0 8px}
+
+/* TASK GRID */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+/* TASK CARD */
+.tc{background:white;border:1.5px solid var(--bd);border-radius:var(--r);padding:11px 11px 9px;cursor:pointer;position:relative;overflow:hidden;transition:transform .16s,box-shadow .16s,background .2s,opacity .2s;box-shadow:0 1px 5px rgba(236,72,153,.05)}
+.tc:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:var(--pk3)}
+.tc.done{background:linear-gradient(135deg,#fff0f8,#fff8fd);opacity:.72}
+.tc.done .tc-title{text-decoration:line-through;color:var(--soft)}
+.tc-row{display:flex;gap:8px;align-items:flex-start}
+.chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--bd);background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.74rem;color:white;transition:all .2s}
+.tc.done .chk{background:linear-gradient(135deg,var(--pk3),var(--pk));border-color:var(--pk);box-shadow:0 2px 8px rgba(236,72,153,.26)}
+.tc-body{flex:1;min-width:0}
+.tc-title{font-size:.83rem;font-weight:600;color:var(--tx);line-height:1.37;word-break:break-word;transition:color .2s}
+.tc-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.tag{font-size:.62rem;font-weight:600;padding:1px 6px;border-radius:99px;border:1.5px solid;white-space:nowrap;max-width:108px;overflow:hidden;text-overflow:ellipsis}
+.t-time{background:#fff0f7;color:#b84070;border-color:#fbb8d0}
+.t-type{background:#f0fbf5;color:#2a7a60;border-color:#a8e8cc}
+.tc-actions{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
+.tc-btn{display:inline-flex;align-items:center;gap:3px;font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:600;padding:2px 7px;border-radius:99px;border:1.5px solid;cursor:pointer;background:white;transition:all .13s;white-space:nowrap}
+.tc-btn-anki{color:#7a4010;border-color:var(--gold)}.tc-btn-anki:hover{background:var(--goldl)}
+.tc-btn-anki.logged{color:#166534;border-color:var(--mint);background:#f0fdf4;cursor:default}
+.tc-btn-quiz{color:#4c1d95;border-color:var(--lav);font-weight:700}.tc-btn-quiz:hover{background:var(--lavl)}
+.tc-btn-note{color:#1060a0;border-color:var(--sky)}.tc-btn-note:hover{background:var(--skyl)}
+.tc-btn-pomo{color:var(--pkd);border-color:var(--pk3)}.tc-btn-pomo:hover{background:var(--pk1)}
+
+/* FIELDS */
+.field{display:block;width:100%;border:1.5px solid var(--bd);border-radius:10px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.84rem;color:var(--tx);background:#fff5f9;outline:none;transition:border-color .16s}
+.field:focus{border-color:var(--pk);background:white}
+textarea.field{resize:vertical;min-height:68px;line-height:1.5}
+.frow{display:flex;gap:7px;margin-bottom:7px}
+.frow .field{flex:1;margin-bottom:0}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(74,18,48,.2);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center;padding:13px}
+.modal-bg.open{display:flex}
+.modal{background:white;border-radius:20px;padding:20px 18px 16px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto;border:2px solid var(--bd);box-shadow:var(--sh2);animation:fadeUp .23s ease both}
+.modal-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.18rem;color:var(--pk);margin-bottom:12px}
+.modal-foot{display:flex;gap:7px;justify-content:flex-end;margin-top:11px}
+
+/* ROTINA */
+.rot-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.rot-card{background:white;border:1.5px solid var(--bd);border-left:4px solid var(--pk3);border-radius:var(--r);padding:11px 12px;box-shadow:var(--sh);display:flex;align-items:flex-start;gap:9px;transition:transform .15s}
+.rot-card:hover{transform:translateY(-2px)}
+
+/* QUIZ */
+.quiz-config{background:#fff5f9;border:1.5px solid var(--bd);border-radius:var(--r);padding:14px 15px;margin-bottom:12px}
+.config-label{font-size:.72rem;font-weight:700;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.chip{padding:5px 12px;border-radius:50px;border:1.5px solid var(--bd);background:white;color:var(--mu);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.chip:hover{border-color:var(--pk3);background:var(--pk1)}
+.chip.active{border-color:var(--pk);background:var(--pk1);color:var(--pkd)}
+.topic-input-row{display:flex;gap:8px;margin-bottom:7px}
+.topic-chips{display:flex;gap:6px;flex-wrap:wrap;min-height:10px}
+.topic-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:50px;background:var(--pk1);border:1.5px solid var(--pk);font-size:.78rem;color:var(--pkd);font-weight:600}
+.topic-chip button{background:none;border:none;cursor:pointer;color:var(--pkd);font-size:.85rem;line-height:1;padding:0}
+.gen-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--pk3),var(--pk));color:white;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 4px 16px rgba(236,72,153,.3);font-family:'DM Sans',sans-serif}
+.gen-btn:hover{filter:brightness(1.05)}
+.gen-btn:disabled{opacity:.6;cursor:not-allowed}
+.score-bar{display:flex;align-items:center;gap:12px;background:white;border-radius:14px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--sh)}
+.q-block{background:white;border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--sh)}
+.q-num{font-size:.67rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.q-text{font-size:.9rem;font-weight:600;color:var(--tx);line-height:1.5;margin-bottom:10px}
+.q-opts{display:flex;flex-direction:column;gap:6px}
+.q-opt{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--bd);cursor:pointer;background:white;transition:all .15s;text-align:left;line-height:1.45;font-size:.85rem;color:var(--tx);width:100%;font-family:'DM Sans',sans-serif}
+.q-opt:hover:not([disabled]){background:var(--pk1);border-color:var(--pk3)}
+.q-opt.correct{background:var(--mintl);border-color:var(--mint);color:#166534}
+.q-opt.wrong{background:var(--redl);border-color:#fca5a5;color:#b91c1c}
+.q-opt.rev{background:var(--mintl);border-color:var(--mint);color:#166534;opacity:.7}
+.q-expl{margin-top:9px;font-size:.79rem;font-style:italic;color:var(--tx);background:var(--lavl);border-left:3px solid var(--lav);border-radius:0 10px 10px 0;padding:8px 11px;line-height:1.55;display:none}
+.q-expl.show{display:block}
+.quiz-result{background:linear-gradient(135deg,var(--pk1),#fff0f8);border:2px solid var(--pk2);border-radius:var(--r);padding:22px;text-align:center;margin-top:12px;box-shadow:var(--sh2)}
+.qr-score{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:600;color:var(--pk);line-height:1}
+
+/* POMODORO */
+.pomo-card{background:white;border:1.5px solid var(--bd);border-radius:var(--r);padding:22px 15px;margin-bottom:12px;text-align:center;box-shadow:var(--sh);transition:border-color .3s}
+.pomo-card.focus-mode{border-color:var(--pk3);box-shadow:0 0 0 4px rgba(236,72,153,.07)}
+.pomo-card.break-mode{border-color:var(--mint)}
+
+/* EXAMS */
+.exam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(162px,1fr));gap:8px;margin-bottom:16px}
+
+/* GRADE TABLE */
+.grade-table{width:100%;border-collapse:collapse;margin-bottom:11px;font-size:.81rem}
+.grade-table th{background:var(--pk1);color:var(--pkd);font-weight:600;padding:6px 8px;text-align:left;font-size:.73rem}
+.grade-table td{padding:6px 8px;border-bottom:1px solid var(--pk1)}
+.grade-table input{border:1.5px solid var(--bd);border-radius:7px;padding:3px 5px;font-size:.79rem;color:var(--tx);background:#fff5f9;outline:none;font-family:'DM Sans',sans-serif}
+.grade-table input:focus{border-color:var(--pk);background:white}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;margin-bottom:16px}
+.stat-card{background:white;border:1.5px solid var(--bd);border-radius:var(--r);padding:11px 9px;text-align:center;box-shadow:var(--sh)}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;color:var(--pk);line-height:1}
+.stat-lbl{font-size:.67rem;color:var(--mu);margin-top:2px}
+
+/* NOTES */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px}
+
+/* HEATMAP */
+.hm-scroll{overflow-x:auto;padding-bottom:5px}
+
+/* ACHIEVEMENTS */
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,var(--goldb),var(--goldl));border:2px solid var(--gold);border-radius:12px;padding:9px 18px;text-align:center;box-shadow:0 5px 20px rgba(245,158,11,.2);z-index:9998;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;font-size:.81rem;white-space:nowrap;max-width:290px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* MOTIV BANNER */
+.motiv{background:linear-gradient(135deg,#fff0f8,#fde8f5);border:1.5px solid var(--pk2);border-radius:var(--r);padding:11px 14px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:var(--sh)}
+.motiv::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--pk3),var(--pk),var(--pk3))}
+
+/* ANKI PILLS */
+.sr-pills{display:flex;gap:3px;flex-wrap:wrap}
+.sr-pill{font-size:.61rem;font-weight:700;padding:2px 6px;border-radius:99px;border:1.5px solid;cursor:default}
+.sr-pill.fu{background:#f5f5f5;color:#bbb;border-color:#e0e0e0}
+.sr-pill.du{background:var(--goldl);color:#7a4010;border-color:var(--gold);cursor:pointer}
+.sr-pill.ov{background:var(--redl);color:#b91c1c;border-color:#fca5a5;cursor:pointer}
+.sr-pill.dn{background:var(--mintl);color:#166534;border-color:var(--mint)}
+
+/* WRONG QUEUE */
+.wrong-card{background:white;border:1.5px solid var(--bd);border-left:4px solid var(--red);border-radius:var(--r);padding:11px 12px;box-shadow:var(--sh);margin-bottom:8px}
+
+@media(max-width:680px){
+  .sidebar{display:none}
+  .bnav{display:block}
+  .main{margin-left:0;padding:12px 10px 90px;max-width:100%}
+  .tgrid{grid-template-columns:1fr}
+  .rot-grid{grid-template-columns:1fr}
+  .exam-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){.exam-grid{grid-template-columns:1fr}}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--pk1)}
+::-webkit-scrollbar-thumb{background:var(--pk3);border-radius:99px}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="toast" id="toast"></div>
+
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-top">
+    <svg width="68" height="40" viewBox="0 0 90 52" fill="none">
+      <path d="M44 26 C36 13,10 7,5 18 C1 25,8 35,21 32 C31 30,40 28,44 26Z" fill="#fba8d4" opacity=".95"/>
+      <path d="M44 26 C38 17,16 11,9 20 C5 26,11 32,22 30 C33 28,41 27,44 26Z" fill="#fde8f5" opacity=".5"/>
+      <path d="M46 26 C54 13,80 7,85 18 C89 25,82 35,69 32 C59 30,50 28,46 26Z" fill="#fba8d4" opacity=".95"/>
+      <path d="M46 26 C52 17,74 11,81 20 C85 26,79 32,68 30 C57 28,49 27,46 26Z" fill="#fde8f5" opacity=".5"/>
+      <path d="M42 29 Q33 43,26 49" stroke="#fba8d4" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M48 29 Q57 43,64 49" stroke="#fba8d4" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M42 29 Q32 45,24 51" stroke="#fde8f5" stroke-width="1.8" stroke-linecap="round" opacity=".6"/>
+      <path d="M48 29 Q58 45,66 51" stroke="#fde8f5" stroke-width="1.8" stroke-linecap="round" opacity=".6"/>
+      <ellipse cx="45" cy="26" rx="7.5" ry="7.5" fill="#ec4899"/>
+      <ellipse cx="45" cy="26" rx="4.5" ry="4.5" fill="#fce7f3" opacity=".4"/>
+    </svg>
+    <h2>Caderninho<br>da Doutora</h2>
+    <div class="sem-badge" onclick="toggleSem()">
+      <span id="semTxt">1o Semestre</span>
+      <span style="font-size:.68rem;opacity:.5">editar</span>
+    </div>
+    <div class="sem-edit" id="semEdit">
+      <input id="semInput" placeholder="Ex: 2o Semestre 2025" maxlength="30"
+        onkeydown="if(event.key==='Enter')saveSem();if(event.key==='Escape')cancelSem();">
+      <div class="sem-btns">
+        <button class="btn btn-pk btn-sm" onclick="saveSem()" style="flex:1">OK</button>
+        <button class="btn btn-gh btn-sm" onclick="cancelSem()" style="flex:1">X</button>
+      </div>
+    </div>
+  </div>
+  <div class="nav-list" id="navList"></div>
+  <div class="sb-foot">feito com amor para a futura medica</div>
+</nav>
+
+<main class="main" id="mainContent"></main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <div class="bnav-inner" id="bnavInner"></div>
+</nav>
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const DAYS = ["Segunda","Terca","Quarta","Quinta","Sexta","Sabado","Domingo"];
+const DAY_PT = {Segunda:"Segunda-feira",Terca:"Terca-feira",Quarta:"Quarta-feira",Quinta:"Quinta-feira",Sexta:"Sexta-feira",Sabado:"Sabado",Domingo:"Domingo"};
+const DAYNUM = {Segunda:1,Terca:2,Quarta:3,Quinta:4,Sexta:5,Sabado:6,Domingo:0};
+const SR = [1,3,7,14,30];
+const SUBJS = ["Anatomia","Bioquimica","Fisiologia","Histologia","Embriologia","Biofisica","Geral"];
+const SCOL = {Anatomia:"#fba8d4",Bioquimica:"#c4b5fd",Fisiologia:"#6ee7b7",Histologia:"#fcd34d",Embriologia:"#93c5fd",Biofisica:"#f9a8d4",Geral:"#e2e8f0"};
+const sCol = s => { for(const k in SCOL) if(s&&s.toLowerCase().includes(k.toLowerCase())) return SCOL[k]; return "#fecfe8"; };
+const todayStr = () => new Date().toISOString().split("T")[0];
+const NAV = [
+  {id:"cronograma",label:"Cronograma"},
+  {id:"rotina",label:"Rotina"},
+  {id:"hoje",label:"Hoje"},
+  {id:"quiz",label:"Quiz IA"},
+  {id:"progresso",label:"Progresso"},
+  {id:"pomodoro",label:"Pomodoro"},
+  {id:"provas",label:"Provas"},
+  {id:"notas",label:"Notas"},
+  {id:"anki",label:"Anki"},
+  {id:"conquistas",label:"Conquistas"},
+  {id:"historico",label:"Historico"},
+];
+const DEF_TASKS = [
+  {id:1,day:"Segunda",time:"08h-10h",title:"Anatomia - Sistema musculo-esqueletico",subj:"Anatomia",type:"Leitura",anki:true},
+  {id:2,day:"Segunda",time:"10h-12h",title:"Bioquimica - Metabolismo celular",subj:"Bioquimica",type:"Teoria",anki:true},
+  {id:3,day:"Segunda",time:"14h-16h",title:"Histologia - Tecidos epiteliais",subj:"Histologia",type:"Leitura",anki:true},
+  {id:4,day:"Terca",time:"07h-09h",title:"Fisiologia - Potencial de acao",subj:"Fisiologia",type:"Teoria",anki:true},
+  {id:5,day:"Terca",time:"09h-11h",title:"Anatomia - Neuroanatomia basica",subj:"Anatomia",type:"Leitura",anki:true},
+  {id:6,day:"Terca",time:"14h-15h30",title:"Embriologia - 1a semana do embriao",subj:"Embriologia",type:"Leitura",anki:true},
+  {id:7,day:"Quarta",time:"07h-09h",title:"Anatomia - Sistema cardiovascular",subj:"Anatomia",type:"Leitura",anki:true},
+  {id:8,day:"Quarta",time:"09h-11h",title:"Fisiologia - Sistema cardiovascular",subj:"Fisiologia",type:"Teoria",anki:true},
+  {id:9,day:"Quinta",time:"07h-09h",title:"Histologia - Tecido conjuntivo",subj:"Histologia",type:"Leitura",anki:true},
+  {id:10,day:"Quinta",time:"09h-11h",title:"Bioquimica - Enzimas e catalise",subj:"Bioquimica",type:"Teoria",anki:true},
+  {id:11,day:"Sexta",time:"07h-09h",title:"Fisiologia - Sistema respiratorio",subj:"Fisiologia",type:"Teoria",anki:true},
+  {id:12,day:"Sexta",time:"09h-10h30",title:"Embriologia - Sistema respiratorio",subj:"Embriologia",type:"Leitura",anki:true},
+  {id:13,day:"Sabado",time:"08h-10h",title:"Simulado rapido (20 questoes)",subj:"Geral",type:"Simulado",anki:false},
+  {id:14,day:"Domingo",time:"09h-10h30",title:"Revisao geral (Anki + mapas)",subj:"Geral",type:"Revisao",anki:false},
+  {id:15,day:"Domingo",time:"Tarde livre",title:"Descanso - voce merece!",subj:"Geral",type:"Autocuidado",anki:false},
+];
+const ROT_SUG = [
+  {title:"Revisao rapida do dia anterior",time:"06h30",desc:"15 min revisando ontem"},
+  {title:"Meditacao matinal",time:"07h00",desc:"5 min para focar a mente"},
+  {title:"Exercicio fisico",time:"17h30",desc:"30 min de atividade fisica"},
+  {title:"Flashcards Anki",time:"20h00",desc:"20 min de revisao diaria"},
+  {title:"Diario de estudos",time:"22h00",desc:"Planejar o dia seguinte"},
+];
+const ACH_DEF = [
+  {id:"first",name:"Primeira Tarefa",desc:"Conclua sua primeira tarefa"},
+  {id:"ten",name:"10 Tarefas",desc:"Conclua 10 tarefas"},
+  {id:"str3",name:"3 Dias Seguidos",desc:"3 dias consecutivos"},
+  {id:"str7",name:"Semana Perfeita",desc:"7 dias consecutivos"},
+  {id:"anki1",name:"Revisao Anki",desc:"Registre no Anki"},
+  {id:"pomo1",name:"Primeiro Pomodoro",desc:"Complete um Pomodoro"},
+  {id:"note1",name:"Anotadora",desc:"Crie uma nota"},
+  {id:"rot1",name:"Rotineira",desc:"Adicione a rotina"},
+  {id:"quiz1",name:"Quiz Mestre",desc:"Faca seu primeiro quiz"},
+  {id:"quizp",name:"Nota 10",desc:"Acerte todas as questoes"},
+  {id:"full",name:"Semana Completa",desc:"Complete todas as tarefas"},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const K = "med_";
+const ls = (k,d) => { try { const v=localStorage.getItem(K+k); return v?JSON.parse(v):d; } catch { return d; } };
+const ss = (k,v) => { try { localStorage.setItem(K+k,JSON.stringify(v)); } catch {} };
+
+let tasks    = ls("t", DEF_TASKS);
+let done     = ls("d", {});
+let ankiLogs = ls("a", []);
+let notes    = ls("n", []);
+let tNotes   = ls("tn", {});
+let studyLog = ls("sl", {});
+let pomoSess = ls("ps", []);
+let exams    = ls("ex", []);
+let gRows    = ls("gr", [{id:1,subj:"Anatomia",n1:"",n2:"",n3:""},{id:2,subj:"Bioquimica",n1:"",n2:"",n3:""},{id:3,subj:"Fisiologia",n1:"",n2:"",n3:""},{id:4,subj:"Histologia",n1:"",n2:"",n3:""},{id:5,subj:"Embriologia",n1:"",n2:"",n3:""}]);
+let rotina   = ls("ro", []);
+let moodLog  = ls("ml", {});
+let quizHist = ls("qh", []);
+let wrongQ   = ls("wq", []);
+let unlockedAch = new Set(ls("ua", []));
+let quizDone = ls("qd", 0);
+let quizPerf = ls("qp", 0);
+let editMode = false;
+let nextId   = tasks.length ? Math.max(...tasks.map(x=>x.id))+1 : 300;
+
+// Quiz state
+let curQuiz = [], quizAns = {}, qSubj = null, qTopics = [], qDiff = "misto", qFmt = "misto", qN = 10;
+
+// Pomo state
+let pomoSec=25*60, pomoRunning=false, pomoPhase="focus", pomoCycle=0, pomoTimer=null, pomoSel="";
+
+function save() {
+  ss("t",tasks); ss("d",done); ss("a",ankiLogs); ss("n",notes); ss("tn",tNotes);
+  ss("sl",studyLog); ss("ps",pomoSess); ss("ex",exams); ss("gr",gRows); ss("ro",rotina);
+  ss("ml",moodLog); ss("qh",quizHist); ss("wq",wrongQ); ss("ua",[...unlockedAch]);
+  ss("qd",quizDone); ss("qp",quizPerf);
+}
+
+// ─── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// ─── NAV ───────────────────────────────────────────────────────────────────
+let curPage = "cronograma";
+
+function buildNav() {
+  const nl = document.getElementById("navList");
+  const bn = document.getElementById("bnavInner");
+  nl.innerHTML = NAV.map(n => `<div class="nav-item${n.id===curPage?" active":""}" onclick="go('${n.id}')">${n.label}</div>`).join("");
+  bn.innerHTML = NAV.map(n => `<div class="bn-item${n.id===curPage?" active":""}" onclick="go('${n.id}')"><div class="bn-label">${n.label}</div></div>`).join("");
+}
+
+function go(page) {
+  curPage = page;
+  buildNav();
+  render();
+}
+
+function render() {
+  const fns = {
+    cronograma: renderCronograma,
+    rotina: renderRotina,
+    hoje: renderHoje,
+    quiz: renderQuiz,
+    progresso: renderProgresso,
+    pomodoro: renderPomodoro,
+    provas: renderProvas,
+    notas: renderNotas,
+    anki: renderAnki,
+    conquistas: renderConquistas,
+    historico: renderHistorico,
+  };
+  if (fns[curPage]) fns[curPage]();
+}
+
+// ─── SEMESTER ──────────────────────────────────────────────────────────────
+function loadSem() { document.getElementById("semTxt").textContent = ls("sem","1o Semestre"); }
+function toggleSem() {
+  const e = document.getElementById("semEdit");
+  if(!e.classList.contains("open")) {
+    document.getElementById("semInput").value = document.getElementById("semTxt").textContent;
+    e.classList.add("open");
+    setTimeout(() => document.getElementById("semInput").focus(), 80);
+  } else cancelSem();
+}
+function saveSem() {
+  const v = document.getElementById("semInput").value.trim();
+  if(v) { ss("sem",v); document.getElementById("semTxt").textContent = v; }
+  document.getElementById("semEdit").classList.remove("open");
+}
+function cancelSem() { document.getElementById("semEdit").classList.remove("open"); }
+
+// ─── ACHIEVEMENTS ──────────────────────────────────────────────────────────
+function checkAch() {
+  const dc = Object.values(done).filter(Boolean).length;
+  let strk=0; const dt=new Date(); dt.setHours(0,0,0,0);
+  while(true){const ds=dt.toISOString().split("T")[0];if(studyLog[ds]&&studyLog[ds]>0){strk++;dt.setDate(dt.getDate()-1);}else break;}
+  const checks = {
+    first:dc>=1, ten:dc>=10, str3:strk>=3, str7:strk>=7,
+    anki1:ankiLogs.length>=1, pomo1:pomoSess.filter(s=>s.tp==="focus").length>=1,
+    note1:notes.length>=1, rot1:rotina.length>=1,
+    quiz1:quizDone>=1, quizp:quizPerf>=1,
+    full:tasks.length>0&&dc===tasks.length
+  };
+  let changed=false;
+  ACH_DEF.forEach(a=>{ if(!unlockedAch.has(a.id)&&checks[a.id]){unlockedAch.add(a.id);changed=true;showToast("Conquista: "+a.name+" desbloqueada!");} });
+  if(changed) save();
+}
+
+// ─── TOGGLE DONE ───────────────────────────────────────────────────────────
+function toggleDone(id) {
+  const td = todayStr();
+  done[id] = !done[id];
+  if(done[id]) studyLog[td] = (studyLog[td]||0)+1;
+  else { studyLog[td] = Math.max(0,(studyLog[td]||1)-1); if(!studyLog[td]) delete studyLog[td]; }
+  save(); checkAch(); render();
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────
+function esc(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+function progBar(pct, label) {
+  return `<div class="prog"><span class="prog-label">${label}</span><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div><span class="prog-pct">${pct}%</span></div>`;
+}
+
+function buildTC(task, editable) {
+  const isDone = !!done[task.id];
+  const isLogged = ankiLogs.some(l=>l.taskId===task.id);
+  const hasNote = !!(tNotes[task.id]&&tNotes[task.id].trim());
+  const col = sCol(task.subj);
+
+  if(editable) {
+    return `<div class="card" style="padding:11px">
+      <input class="field" value="${esc(task.title)}" oninput="updTask(${task.id},'title',this.value)" placeholder="Titulo" style="margin-bottom:6px">
+      <div class="frow">
+        <select class="field" onchange="updTask(${task.id},'day',this.value)">${DAYS.map(d=>`<option${d===task.day?" selected":""}>${d}</option>`).join("")}</select>
+        <input class="field" value="${esc(task.time)}" oninput="updTask(${task.id},'time',this.value)" placeholder="Horario">
+      </div>
+      <div class="frow">
+        <input class="field" value="${esc(task.subj)}" oninput="updTask(${task.id},'subj',this.value)" placeholder="Materia">
+        <input class="field" value="${esc(task.type)}" oninput="updTask(${task.id},'type',this.value)" placeholder="Tipo">
+      </div>
+      <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--mu);cursor:pointer;margin-bottom:7px">
+        <input type="checkbox" ${task.anki?"checked":""} onchange="updTask(${task.id},'anki',this.checked)" style="accent-color:var(--pk)">Anki
+      </label>
+      <button class="btn btn-sm" onclick="delTask(${task.id})" style="color:#d05070;border-color:#fcc">Remover</button>
+    </div>`;
+  }
+
+  let acts = "";
+  if(isDone) {
+    if(task.anki&&!isLogged) acts += `<button class="tc-btn tc-btn-anki" onclick="event.stopPropagation();openAnkiModal(${task.id})">Anki</button>`;
+    if(task.anki&&isLogged) acts += `<span class="tc-btn tc-btn-anki logged">Anki OK</span>`;
+    if(task.subj!=="Bem-estar") acts += `<button class="tc-btn tc-btn-quiz" onclick="event.stopPropagation();startQuizForTask(${task.id})">Quiz IA</button>`;
+  }
+  acts += `<button class="tc-btn tc-btn-note" onclick="event.stopPropagation();openNoteModal(${task.id})">${hasNote?"Ver nota":"Nota"}</button>`;
+  acts += `<button class="tc-btn tc-btn-pomo" onclick="event.stopPropagation();go('pomodoro')">Pomo</button>`;
+
+  const notePrev = hasNote ? `<div style="margin-top:5px;font-size:.71rem;font-style:italic;color:var(--mu);background:#f0f9ff;border-left:3px solid #38bdf8;border-radius:0 7px 7px 0;padding:3px 7px;line-height:1.5;word-break:break-word">${esc(tNotes[task.id].substring(0,80))}${tNotes[task.id].length>80?"...":""}</div>` : "";
+
+  return `<div class="tc${isDone?" done":""}" onclick="toggleDone(${task.id})" style="border-left-color:${col}">
+    <div class="tc-row">
+      <div class="chk">${isDone?"v":""}</div>
+      <div class="tc-body">
+        <div class="tc-title">${esc(task.title)}</div>
+        <div class="tc-tags">
+          ${task.time?`<span class="tag t-time">${esc(task.time)}</span>`:""}
+          ${task.subj?`<span class="tag" style="background:${col}22;border-color:${col};color:var(--tx)">${esc(task.subj)}</span>`:""}
+          ${task.type?`<span class="tag t-type">${esc(task.type)}</span>`:""}
+        </div>
+        ${notePrev}
+        <div class="tc-actions">${acts}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── PAGE: CRONOGRAMA ──────────────────────────────────────────────────────
+function renderCronograma() {
+  const total = tasks.length;
+  const dc = Object.values(done).filter(Boolean).length;
+  const pct = total ? Math.round(dc/total*100) : 0;
+  const td = todayStr();
+  const todayMood = moodLog[td];
+
+  const byDay = {};
+  DAYS.forEach(d => byDay[d]=[]);
+  tasks.forEach(t => { if(byDay[t.day]) byDay[t.day].push(t); });
+
+  let html = `<div class="page-title">Cronograma Semanal</div>
+<div class="page-sub">Marque como feita — clique em Quiz IA ao concluir</div>
+<div class="motiv">
+  <div style="font-size:.82rem;font-style:italic;color:var(--tx);line-height:1.55">Cada pagina virada hoje e um passo mais perto do jaleco branco. Continue, futura doutora!</div>
+</div>
+<div style="background:white;border:1.5px solid var(--bd);border-radius:16px;padding:11px 15px;margin-bottom:14px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  <span style="font-size:.78rem;font-weight:600;color:var(--mu);flex-shrink:0">Como voce esta hoje?</span>
+  ${todayMood
+    ? `<span style="font-size:.74rem;font-weight:600;color:var(--mint)">${esc(todayMood)} registrado!</span>`
+    : `<div style="display:flex;gap:6px;flex-wrap:wrap">${["Cansada","Ok","Bem","Otima","Focada"].map(l=>`<button onclick="saveMood('${l}')" style="background:none;border:2px solid var(--bd);border-radius:50px;padding:4px 10px;cursor:pointer;font-size:.82rem;font-family:'DM Sans',sans-serif">${l}</button>`).join("")}</div>`
+  }
+</div>
+${progBar(pct,"Semana")}
+<div class="toolbar">
+  <button class="btn btn-pk" onclick="openAddModal()">+ Nova tarefa</button>
+  <button class="btn btn-gh" onclick="editMode=!editMode;render()">${editMode?"Concluir":"Editar"}</button>
+  <button class="btn btn-gh btn-sm" onclick="if(window.confirm('Limpar marcacoes?')){done={};save();render();}">Nova semana</button>
+</div>`;
+
+  DAYS.forEach((day,di) => {
+    const list = byDay[day]||[];
+    const dn = list.filter(t=>done[t.id]).length;
+    html += `<div style="margin-bottom:17px;animation:fadeUp .35s ${di*.05}s ease both">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">
+        <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.07rem;font-weight:600;color:var(--pk);white-space:nowrap">${DAY_PT[day]}</span>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,var(--pk2),transparent);min-width:6px"></div>
+        <span style="font-size:.66rem;font-weight:600;color:var(--mu);background:var(--pk1);border:1.5px solid var(--bd);border-radius:99px;padding:2px 8px;flex-shrink:0">${dn}/${list.length}</span>
+      </div>
+      ${list.length===0&&!editMode?`<div style="color:var(--mu);font-size:.78rem;padding:2px">Nenhuma tarefa</div>`:""}
+      <div class="tgrid">
+        ${list.map(t=>buildTC(t,editMode)).join("")}
+        ${editMode?`<button class="btn btn-gh btn-sm" onclick="quickAddDay('${day}')">+ Tarefa aqui</button>`:""}
+      </div>
+    </div>`;
+  });
+
+  html += `
+<!-- Add Task Modal -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Nova Tarefa</div>
+    <input id="ntTitle" class="field" placeholder="Titulo..." style="margin-bottom:7px">
+    <div class="frow">
+      <select id="ntDay" class="field">${DAYS.map(d=>`<option>${d}</option>`).join("")}</select>
+      <input id="ntTime" class="field" placeholder="Horario">
+    </div>
+    <div class="frow">
+      <input id="ntSubj" class="field" placeholder="Materia">
+      <input id="ntType" class="field" placeholder="Tipo">
+    </div>
+    <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--mu);cursor:pointer;margin-bottom:8px">
+      <input type="checkbox" id="ntAnki" style="accent-color:var(--pk)">Registrar no Anki ao concluir
+    </label>
+    <div class="modal-foot">
+      <button class="btn btn-gh" onclick="closeModal('addModal')">Cancelar</button>
+      <button class="btn btn-pk" onclick="addTask()">Adicionar</button>
+    </div>
+  </div>
+</div>
+<!-- Anki Modal -->
+<div class="modal-bg" id="ankiModal">
+  <div class="modal">
+    <div class="modal-title">Registrar no Anki</div>
+    <div id="ankiTaskTitle" style="font-weight:600;font-size:.83rem;margin-bottom:8px"></div>
+    <input id="ankiSubjIn" class="field" placeholder="Materia / topico..." style="margin-bottom:6px">
+    <p style="font-size:.71rem;color:var(--mu)">Revisoes: +1d, +3d, +7d, +14d, +30d</p>
+    <div class="modal-foot">
+      <button class="btn btn-gh" onclick="closeModal('ankiModal')">Agora nao</button>
+      <button class="btn btn-pk" onclick="confirmAnki()">Registrar</button>
+    </div>
+  </div>
+</div>
+<!-- Note Modal -->
+<div class="modal-bg" id="noteModal">
+  <div class="modal">
+    <div class="modal-title">Nota rapida</div>
+    <div id="noteTaskTitle" style="font-weight:600;font-size:.82rem;margin-bottom:7px"></div>
+    <textarea id="noteText" class="field" placeholder="Dificuldades, duvidas, insights..."></textarea>
+    <div class="modal-foot">
+      <button class="btn btn-gh" onclick="closeModal('noteModal')">Cancelar</button>
+      <button class="btn btn-pk" onclick="saveNote()">Salvar</button>
+    </div>
+  </div>
+</div>`;
+
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+let pendingAnkiId = null, pendingNoteId = null;
+
+function saveMood(label) { moodLog[todayStr()] = label; save(); render(); }
+function openAddModal() { openModal("addModal"); setTimeout(()=>document.getElementById("ntTitle").focus(),100); }
+function quickAddDay(day) { openModal("addModal"); setTimeout(()=>{ document.getElementById("ntDay").value=day; document.getElementById("ntTitle").focus(); },100); }
+function addTask() {
+  const title = document.getElementById("ntTitle").value.trim();
+  if(!title) return;
+  tasks.push({id:nextId++,day:document.getElementById("ntDay").value,time:document.getElementById("ntTime").value.trim(),title,subj:document.getElementById("ntSubj").value.trim(),type:document.getElementById("ntType").value.trim(),anki:document.getElementById("ntAnki").checked});
+  save(); closeModal("addModal"); render();
+}
+function updTask(id,f,v) { const t=tasks.find(x=>x.id===id); if(t){t[f]=v;save();} }
+function delTask(id) { if(!window.confirm("Remover?"))return; tasks=tasks.filter(t=>t.id!==id); delete done[id]; delete tNotes[id]; ankiLogs=ankiLogs.filter(l=>l.taskId!==id); save(); render(); }
+
+function openAnkiModal(id) {
+  pendingAnkiId = id;
+  const t = tasks.find(x=>x.id===id);
+  document.getElementById("ankiTaskTitle").textContent = t?t.title:"";
+  document.getElementById("ankiSubjIn").value = t?t.subj||"":"";
+  openModal("ankiModal");
+}
+function confirmAnki() {
+  if(!pendingAnkiId) return;
+  const t = tasks.find(x=>x.id===pendingAnkiId);
+  const subj = document.getElementById("ankiSubjIn").value.trim() || (t?t.subj:"") || "Geral";
+  const d = new Date(); d.setHours(0,0,0,0);
+  const reviews = SR.map(days=>{ const rd=new Date(d); rd.setDate(rd.getDate()+days); return {date:rd.toISOString().split("T")[0],done:false}; });
+  ankiLogs.push({taskId:pendingAnkiId,subj,logDate:todayStr(),reviews});
+  save(); checkAch(); closeModal("ankiModal"); render();
+}
+function openNoteModal(id) {
+  pendingNoteId = id;
+  const t = tasks.find(x=>x.id===id);
+  document.getElementById("noteTaskTitle").textContent = t?t.title:"";
+  document.getElementById("noteText").value = tNotes[id]||"";
+  openModal("noteModal");
+}
+function saveNote() {
+  const v = document.getElementById("noteText").value.trim();
+  if(v) tNotes[pendingNoteId] = v; else delete tNotes[pendingNoteId];
+  save(); closeModal("noteModal"); render();
+}
+function startQuizForTask(id) {
+  const t = tasks.find(x=>x.id===id);
+  if(t) { qSubj=t.subj||null; qTopics=[t.title]; }
+  go("quiz");
+}
+
+// ─── PAGE: ROTINA ──────────────────────────────────────────────────────────
+function renderRotina() {
+  const existTitles = rotina.map(r=>r.title);
+  const avail = ROT_SUG.filter(s=>!existTitles.includes(s.title));
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Rotina Diaria</div>
+<div class="page-sub">Atividades fixas que se repetem todos os dias</div>
+<div style="font-size:.8rem;color:var(--mu);margin-bottom:14px;background:var(--pk1);border-radius:10px;padding:8px 12px;border-left:3px solid var(--pk3)">
+  Sua rotina aparece automaticamente no Modo Hoje. Configure seus habitos fixos aqui!
+</div>
+<div class="toolbar"><button class="btn btn-pk" onclick="openModal('rotModal')">+ Adicionar atividade</button></div>
+<div class="rot-grid">
+  ${rotina.length===0?`<div style="color:var(--mu);font-size:.82rem;grid-column:1/-1;padding:8px;text-align:center">Nenhuma atividade ainda. Adicione acima ou use as sugestoes!</div>`:
+    rotina.map(r=>`<div class="rot-card">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.84rem;font-weight:700;color:var(--tx);margin-bottom:2px">${esc(r.title)}</div>
+        ${r.time?`<div style="font-size:.71rem;color:var(--mu)">${esc(r.time)}</div>`:""}
+        ${r.desc?`<div style="font-size:.74rem;color:var(--tx);margin-top:3px;line-height:1.4;opacity:.8">${esc(r.desc)}</div>`:""}
+      </div>
+      <button onclick="delRotina(${r.id})" style="background:none;border:none;cursor:pointer;font-size:.76rem;color:#d06080;opacity:.34;padding:0;flex-shrink:0">X</button>
+    </div>`).join("")}
+</div>
+<div class="sec-title">Sugestoes de rotina</div>
+<div class="rot-grid">
+  ${avail.length===0?`<div style="color:var(--mu);font-size:.81rem;grid-column:1/-1;padding:7px">Voce ja adicionou todas as sugestoes!</div>`:
+    avail.map((s,i)=>`<div class="rot-card" style="opacity:.74;cursor:pointer" onclick="addRotinaSug(${ROT_SUG.indexOf(s)})">
+      <div style="flex:1">
+        <div style="font-size:.84rem;font-weight:700;color:var(--tx);margin-bottom:2px">${esc(s.title)}</div>
+        ${s.time?`<div style="font-size:.71rem;color:var(--mu)">${esc(s.time)}</div>`:""}
+        ${s.desc?`<div style="font-size:.74rem;color:var(--tx);margin-top:3px;opacity:.8">${esc(s.desc)}</div>`:""}
+      </div>
+      <span style="font-size:.7rem;color:var(--pk);font-weight:700;flex-shrink:0;align-self:center">+ Add</span>
+    </div>`).join("")}
+</div>
+<div class="modal-bg" id="rotModal">
+  <div class="modal">
+    <div class="modal-title">Nova Atividade da Rotina</div>
+    <input id="rtTitle" class="field" placeholder="Nome da atividade..." style="margin-bottom:7px">
+    <div class="frow">
+      <input id="rtTime" class="field" placeholder="Horario (ex: 06h30)">
+    </div>
+    <textarea id="rtDesc" class="field" placeholder="Descricao breve (opcional)..." style="min-height:56px;margin-bottom:7px"></textarea>
+    <div class="modal-foot">
+      <button class="btn btn-gh" onclick="closeModal('rotModal')">Cancelar</button>
+      <button class="btn btn-pk" onclick="addRotina()">Adicionar</button>
+    </div>
+  </div>
+</div>`;
+}
+function addRotina() {
+  const title = document.getElementById("rtTitle").value.trim();
+  if(!title) return;
+  rotina.push({id:Date.now(),title,time:document.getElementById("rtTime").value.trim(),desc:document.getElementById("rtDesc").value.trim()});
+  save(); checkAch(); closeModal("rotModal"); render();
+}
+function delRotina(id) { rotina=rotina.filter(r=>r.id!==id); save(); render(); }
+function addRotinaSug(i) { const s=ROT_SUG[i]; rotina.push({id:Date.now(),...s}); save(); checkAch(); showToast("Adicionada: "+s.title); render(); }
+
+// ─── PAGE: HOJE ────────────────────────────────────────────────────────────
+function renderHoje() {
+  const dow = new Date().getDay();
+  const dayName = DAYS.find(d=>DAYNUM[d]===dow)||"Segunda";
+  const list = tasks.filter(t=>t.day===dayName);
+  const dn = list.filter(t=>done[t.id]).length;
+  const pct = list.length?Math.round(dn/list.length*100):0;
+  const dateLabel = new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Modo Hoje</div>
+<div class="page-sub">${dateLabel}</div>
+${progBar(pct,"Hoje")}
+<div class="sec-title">Rotina de hoje</div>
+<div class="rot-grid">
+  ${rotina.length===0
+    ? `<div style="color:var(--mu);font-size:.79rem;grid-column:1/-1;padding:5px">Sem rotina. <button class="btn btn-gh btn-sm" onclick="go('rotina')">Configurar rotina</button></div>`
+    : rotina.map(r=>`<div class="rot-card">
+        <div>
+          <div style="font-size:.84rem;font-weight:700;color:var(--tx)">${esc(r.title)}</div>
+          ${r.time?`<div style="font-size:.71rem;color:var(--mu)">${esc(r.time)}</div>`:""}
+        </div>
+      </div>`).join("")}
+</div>
+<div class="sec-title">Tarefas de hoje</div>
+<div class="tgrid">
+  ${list.length===0
+    ? `<div style="color:var(--mu);font-size:.83rem;grid-column:1/-1;text-align:center;padding:22px">Nao ha tarefas para hoje! Descanse bem.</div>`
+    : list.map(t=>buildTC(t,false)).join("")}
+</div>`;
+}
+
+// ─── PAGE: QUIZ IA ─────────────────────────────────────────────────────────
+function renderQuiz() {
+  if(curQuiz.length > 0) { renderQuizQuestions(); return; }
+
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Quiz IA</div>
+<div class="page-sub">Configure o conteudo exato que voce quer treinar</div>
+<div class="quiz-config">
+  <div class="config-label">MATERIA</div>
+  <div class="chips" id="subjChips">
+    ${SUBJS.map(s=>`<button class="chip${qSubj===s?" active":""}" onclick="toggleSubj('${s}')">${s}</button>`).join("")}
+  </div>
+  <div class="config-label">TOPICO ESPECIFICO — descreva o que voce estudou</div>
+  <div class="topic-input-row">
+    <input id="topicInput" class="field" placeholder="Ex: Musculo biceps braquial, origem e insercao..." onkeydown="if(event.key==='Enter')addTopic()">
+    <button class="btn btn-gh btn-sm" onclick="addTopic()">+ Add</button>
+  </div>
+  <div class="topic-chips" id="topicChips">
+    ${qTopics.map((t,i)=>`<span class="topic-chip">${esc(t)}<button onclick="removeTopic(${i})">x</button></span>`).join("")}
+  </div>
+  <div class="config-label" style="margin-top:13px">DIFICULDADE</div>
+  <div class="chips">
+    ${[["misto","Misto"],["facil","Facil"],["medio","Medio"],["dificil","Dificil"]].map(([v,l])=>`<button class="chip${qDiff===v?" active":""}" onclick="qDiff='${v}';renderQuiz()">${l}</button>`).join("")}
+  </div>
+  <div class="config-label">FORMATO</div>
+  <div class="chips">
+    ${[["misto","Misto"],["clinico","Caso clinico"],["direto","Teorico direto"],["aplicado","Aplicado"]].map(([v,l])=>`<button class="chip${qFmt===v?" active":""}" onclick="qFmt='${v}';renderQuiz()">${l}</button>`).join("")}
+  </div>
+  <div class="config-label">QUANTIDADE</div>
+  <div class="chips">
+    ${[5,10,15].map(n=>`<button class="chip${qN===n?" active":""}" onclick="qN=${n};renderQuiz()">${n} questoes</button>`).join("")}
+  </div>
+  <button class="gen-btn" onclick="generateQuiz()">Gerar Quiz</button>
+</div>
+<div id="quizStatus"></div>`;
+}
+
+function toggleSubj(s) { qSubj = qSubj===s?null:s; renderQuiz(); }
+function addTopic() {
+  const v = document.getElementById("topicInput").value.trim();
+  if(v && !qTopics.includes(v)) { qTopics.push(v); document.getElementById("topicInput").value=""; renderQuiz(); }
+}
+function removeTopic(i) { qTopics.splice(i,1); renderQuiz(); }
+
+async function generateQuiz() {
+  const subj = qSubj||"Medicina Geral";
+  const topicsStr = qTopics.length ? qTopics.join(", ") : "conteudo geral de "+subj;
+  const dMap = {misto:"variada (facil, medio e dificil)",facil:"facil",medio:"media",dificil:"dificil"};
+  const fMap = {misto:"misto (teorico e casos clinicos)",clinico:"apenas casos clinicos",direto:"teorico direto",aplicado:"aplicacao e fisiopatologia"};
+
+  const prompt =
+    "Voce e professor de medicina especialista em "+subj+". "+
+    "Crie EXATAMENTE "+qN+" questoes de multipla escolha estilo ENARE/residencia sobre: "+topicsStr+". "+
+    "Dificuldade: "+dMap[qDiff]+". Formato: "+fMap[qFmt]+". "+
+    "5 alternativas (A,B,C,D,E), questoes clinicas especificas, explicacao didatica. "+
+    "RESPONDA SOMENTE com JSON puro, sem markdown: "+
+    '{"questions":[{"q":"enunciado","opts":{"A":"","B":"","C":"","D":"","E":""},"ans":"A","exp":"explicacao"}]}';
+
+  document.getElementById("quizStatus").innerHTML = `
+<div style="background:white;border-radius:16px;padding:30px 20px;text-align:center;box-shadow:var(--sh)">
+  <div class="spin" style="font-size:1.8rem;margin-bottom:10px">*</div>
+  <div style="font-size:.95rem;color:var(--mu);font-style:italic">Gerando questoes de nivel medico...</div>
+</div>`;
+
+  try {
+    // *** CHAMA O BACKEND NETLIFY — NAO O ANTHROPIC DIRETAMENTE ***
+    const res = await fetch("/api/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        max_tokens: 6000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if(!res.ok) {
+      const err = await res.text();
+      throw new Error("Erro HTTP "+res.status+": "+err.slice(0,150));
+    }
+
+    const data = await res.json();
+    const blocks = Array.isArray(data.content) ? data.content : [];
+    let raw = blocks.filter(b=>b&&b.type==="text").map(b=>b.text).join("").trim();
+    raw = raw.replace(/^```[\w]*\s*/i,"").replace(/\s*```\s*$/i,"").trim();
+    const a=raw.indexOf("{"), b=raw.lastIndexOf("}");
+    if(a<0||b<0) throw new Error("JSON nao encontrado na resposta.");
+    const parsed = JSON.parse(raw.slice(a,b+1));
+    const qs = Array.isArray(parsed.questions) ? parsed.questions : [];
+    if(!qs.length) throw new Error("Nenhuma questao retornada.");
+    curQuiz = qs; quizAns = {};
+    renderQuizQuestions();
+  } catch(e) {
+    document.getElementById("quizStatus").innerHTML = `
+<div style="background:#fff5f5;border:1.5px solid #fca5a5;border-radius:16px;padding:16px;margin-bottom:16px">
+  <div style="font-weight:700;color:var(--red);margin-bottom:6px">Erro ao gerar questoes</div>
+  <div style="font-size:.82rem;color:#b91c1c;word-break:break-word;margin-bottom:12px">${esc(String(e.message||e))}</div>
+  <button class="btn btn-pk btn-sm" onclick="generateQuiz()">Tentar novamente</button>
+</div>`;
+  }
+}
+
+function renderQuizQuestions() {
+  const answered = Object.keys(quizAns).length;
+  const correct = answered ? Object.entries(quizAns).filter(([i,a])=>a===curQuiz[+i].ans).length : 0;
+  const allDone = curQuiz.length>0 && answered===curQuiz.length;
+  const pct = answered ? Math.round(correct/answered*100) : 0;
+
+  let html = `
+<div class="page-title">Quiz IA</div>
+<div class="page-sub">${qSubj||"Medicina"} — ${qTopics.length?qTopics.join(", "):"Geral"}</div>
+<div class="score-bar">
+  <span style="font-size:.82rem;font-weight:700;color:var(--pkd);white-space:nowrap">${correct}/${answered} corretas</span>
+  <div style="flex:1;height:10px;background:var(--pk1);border-radius:99px;overflow:hidden">
+    <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pk3),var(--pk));width:${pct}%;transition:width .5s"></div>
+  </div>
+  <span style="font-size:.82rem;font-weight:700;color:var(--pk);white-space:nowrap">${pct}%</span>
+</div>`;
+
+  curQuiz.forEach((q,i) => {
+    const ua = quizAns[i];
+    const isAns = ua !== undefined;
+    html += `<div class="q-block">
+      <div class="q-num">Questao ${i+1} de ${curQuiz.length}</div>
+      <div class="q-text">${esc(q.q)}</div>
+      <div class="q-opts">
+        ${Object.entries(q.opts).map(([l,t]) => {
+          let cls = "q-opt";
+          if(isAns) {
+            if(l===ua) cls += l===q.ans?" correct":" wrong";
+            else if(l===q.ans) cls += " rev";
+          }
+          return `<button class="${cls}" onclick="pickAnswer(${i},'${l}')" ${isAns?"disabled":""}>
+            <span style="font-weight:700;flex-shrink:0;min-width:16px">${l}</span>
+            <span>${esc(t)}</span>
+          </button>`;
+        }).join("")}
+      </div>
+      ${isAns?`<div class="q-expl show">${esc(q.exp)}</div>`:""}
+    </div>`;
+  });
+
+  if(allDone) {
+    html += `<div class="quiz-result">
+      <div class="qr-score">${correct}/${curQuiz.length}</div>
+      <div style="font-size:.85rem;color:var(--mu);margin-top:4px">${Math.round(correct/curQuiz.length*100)}% de acertos</div>
+      <div style="font-size:.9rem;font-style:italic;color:var(--tx);margin-top:10px;line-height:1.6">
+        ${correct===curQuiz.length?"Perfeito! Voce dominou esse conteudo!":
+          correct>=curQuiz.length*.8?"Excelente desempenho!":
+          correct>=curQuiz.length*.6?"Bom! Revise os erros com cuidado.":
+          "Continue estudando! Os erros mostram onde focar."}
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-pk" onclick="curQuiz=[];quizAns={};renderQuiz()">Novo Quiz</button>
+        <button class="btn btn-gh" onclick="curQuiz=[];quizAns={};qTopics=[];qSubj=null;renderQuiz()">Reconfigurar</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById("mainContent").innerHTML = html;
+}
+
+function pickAnswer(qi, letter) {
+  if(quizAns[qi]!==undefined) return;
+  quizAns[qi] = letter;
+  if(letter !== curQuiz[qi].ans) {
+    wrongQ.unshift({subj:qSubj||"Geral",q:curQuiz[qi].q,correct:curQuiz[qi].ans,correctText:curQuiz[qi].opts[curQuiz[qi].ans],date:todayStr()});
+    wrongQ = wrongQ.slice(0,30);
+  }
+  if(Object.keys(quizAns).length === curQuiz.length) {
+    const c = Object.values(quizAns).filter((a,i)=>a===curQuiz[i].ans).length;
+    quizDone++; if(c===curQuiz.length) quizPerf++;
+    quizHist.push({date:todayStr(),subj:qSubj||"Geral",correct:c,total:curQuiz.length});
+    quizHist = quizHist.slice(-50);
+    save(); checkAch();
+  }
+  renderQuizQuestions();
+  setTimeout(()=>{ const el=document.querySelectorAll(".q-block")[qi]; if(el)el.scrollIntoView({behavior:"smooth",block:"nearest"}); },50);
+}
+
+// ─── PAGE: PROGRESSO ──────────────────────────────────────────────────────
+function renderProgresso() {
+  const total = quizHist.reduce((a,h)=>a+h.total,0);
+  const correct = quizHist.reduce((a,h)=>a+h.correct,0);
+  const rate = total?Math.round(correct/total*100):0;
+  const bySubj = {};
+  quizHist.forEach(h=>{if(!bySubj[h.subj])bySubj[h.subj]={c:0,t:0};bySubj[h.subj].c+=h.correct;bySubj[h.subj].t+=h.total;});
+  const taskBySubj = {};
+  tasks.forEach(t=>{if(t.subj&&t.subj!=="Bem-estar"){if(!taskBySubj[t.subj])taskBySubj[t.subj]={total:0,done:0};taskBySubj[t.subj].total++;if(done[t.id])taskBySubj[t.subj].done++;}});
+  const ACC=["#ec4899","#f59e0b","#34d399","#38bdf8","#a78bfa","#fb923c"];
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Progresso</div>
+<div class="page-sub">Desempenho nos quizzes e progresso por materia</div>
+<div class="sec-title">Desempenho nos Quizzes</div>
+<div class="stats-grid">
+  ${[{n:quizDone,l:"Quizzes",c:"var(--pk)"},{n:correct,l:"Acertos",c:"var(--mint)"},{n:rate+"%",l:"Taxa geral",c:rate>=70?"var(--mint)":rate>=50?"var(--gold)":"var(--red)"},{n:wrongQ.length,l:"Para revisar",c:"var(--red)"}].map(s=>`
+  <div class="stat-card">
+    <div class="stat-num" style="color:${s.c}">${s.n}</div>
+    <div class="stat-lbl">${s.l}</div>
+  </div>`).join("")}
+</div>
+${Object.keys(bySubj).length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px;margin-bottom:16px">
+  ${Object.entries(bySubj).map(([subj,v],i)=>{const r=Math.round(v.c/v.t*100);const c=r>=70?"var(--mint)":r>=50?"var(--gold)":"var(--red)";return`<div class="card" style="border-top:3px solid ${ACC[i%ACC.length]}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-size:.84rem;font-weight:700;color:var(--tx)">${subj}</div><div style="font-size:.82rem;font-weight:700;color:${c}">${r}%</div></div>
+    <div style="height:7px;background:var(--pk1);border-radius:99px;overflow:hidden"><div style="height:100%;border-radius:99px;background:${c};width:${r}%;transition:width .5s"></div></div>
+    <div style="font-size:.68rem;color:var(--mu);margin-top:4px">${v.c}/${v.t} corretas</div>
+  </div>`}).join("")}
+</div>`:""}
+<div class="sec-title">Progresso por Materia</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-bottom:16px">
+  ${Object.entries(taskBySubj).map(([subj,v])=>{const r=v.total?Math.round(v.done/v.total*100):0;const col=sCol(subj);return`<div class="card" style="border-left:4px solid ${col}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px"><div style="font-size:.85rem;font-weight:700;color:var(--tx)">${subj}</div><div style="font-size:.8rem;font-weight:700;color:var(--pk)">${r}%</div></div>
+    <div style="height:8px;background:var(--pk1);border-radius:99px;overflow:hidden;margin-bottom:4px"><div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pk3),var(--pk));width:${r}%;transition:width .5s"></div></div>
+    <div style="font-size:.68rem;color:var(--mu)">${v.done}/${v.total} tarefas concluidas</div>
+  </div>`}).join("")}
+</div>
+<div class="sec-title">Erros para Revisar</div>
+${wrongQ.length===0?`<div style="color:var(--mu);font-size:.82rem;padding:10px;text-align:center">Nenhum erro registrado — continue assim!</div>`:
+  wrongQ.slice(0,10).map(w=>`<div class="wrong-card">
+    <div style="font-size:.72rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${esc(w.subj)} - ${w.date}</div>
+    <div style="font-size:.82rem;color:var(--tx);line-height:1.4;margin-bottom:6px">${esc(w.q.substring(0,120))}${w.q.length>120?"...":""}</div>
+    <div style="font-size:.74rem;color:var(--mu);font-style:italic">Resposta: ${w.correct} - ${esc(w.correctText)}</div>
+  </div>`).join("")}`;
+}
+
+// ─── PAGE: POMODORO ────────────────────────────────────────────────────────
+function renderPomodoro() {
+  const CIRC = 2*Math.PI*55;
+  const total = pomoPhase==="focus"?25*60:5*60;
+  const offset = CIRC*(1-pomoSec/total);
+  const m = Math.floor(pomoSec/60), s = pomoSec%60;
+  const td = todayStr();
+  const todaySess = pomoSess.filter(s=>s.date===td);
+  const pending = tasks.filter(t=>!done[t.id]);
+
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Pomodoro</div>
+<div class="page-sub">25 min foco, 5 min pausa</div>
+<div class="pomo-card${pomoRunning?(pomoPhase==="break"?" break-mode":" focus-mode"):""}">
+  <div style="position:relative;width:134px;height:134px;margin:0 auto 11px">
+    <svg width="134" height="134" viewBox="0 0 134 134" style="transform:rotate(-90deg)">
+      <circle cx="67" cy="67" r="55" fill="none" stroke="var(--pk1)" stroke-width="9"/>
+      <circle cx="67" cy="67" r="55" fill="none" stroke="url(#pg2)" stroke-width="9"
+        stroke-linecap="round" stroke-dasharray="${CIRC}"
+        stroke-dashoffset="${offset}" style="transition:stroke-dashoffset .9s linear"/>
+      <defs><linearGradient id="pg2" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="var(--pk3)"/>
+        <stop offset="100%" stop-color="var(--pk)"/>
+      </linearGradient></defs>
+    </svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:1.8rem;font-weight:700;color:var(--pk);font-variant-numeric:tabular-nums;line-height:1">${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}</div>
+      <div style="font-size:.66rem;color:var(--mu);margin-top:2px;letter-spacing:1px;text-transform:uppercase">${pomoPhase==="focus"?"FOCO":"PAUSA"}</div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:7px;margin-bottom:11px">
+    ${Array.from({length:4},(_,i)=>`<div style="width:8px;height:8px;border-radius:50%;background:${i<pomoCycle?"var(--pk)":"var(--pk2)"};transition:background .3s"></div>`).join("")}
+  </div>
+  <select onchange="pomoSel=this.value" style="max-width:270px;margin:0 auto 10px;display:block;border:1.5px solid var(--bd);border-radius:10px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.84rem;color:var(--tx);background:#fff5f9;outline:none;width:100%">
+    <option value="">Selecione uma tarefa (opcional)</option>
+    ${pending.map(t=>`<option value="${t.id}"${pomoSel==t.id?" selected":""}>${esc(t.title)}</option>`).join("")}
+  </select>
+  <div style="display:flex;justify-content:center;gap:7px;flex-wrap:wrap">
+    <button class="btn btn-pk" onclick="pomoToggle()">${pomoRunning?"Pausar":"Iniciar"}</button>
+    <button class="btn btn-gh" onclick="pomoReset()">Resetar</button>
+    <button class="btn btn-gh btn-sm" onclick="pomoSkip()">Pular</button>
+  </div>
+</div>
+<div class="card">
+  <div style="font-size:.78rem;font-weight:600;color:var(--mu);margin-bottom:7px">Sessoes de hoje</div>
+  ${todaySess.length===0?`<div style="font-size:.78rem;color:var(--mu)">Nenhuma sessao ainda</div>`:
+    todaySess.map(s=>`<div style="display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--pk1)">
+      <span>${s.tp==="focus"?"[F]":"[P]"}</span>
+      <span style="flex:1;font-size:.78rem">${esc(s.task)}</span>
+      <span style="font-size:.68rem;color:var(--mu)">${s.tp==="focus"?"25min":"5min"}</span>
+    </div>`).join("")}
+</div>`;
+}
+
+function pomoToggle() {
+  if(pomoRunning) {
+    clearInterval(pomoTimer); pomoTimer=null; pomoRunning=false;
+  } else {
+    pomoRunning=true;
+    pomoTimer = setInterval(() => {
+      pomoSec--;
+      if(pomoSec <= 0) {
+        clearInterval(pomoTimer); pomoTimer=null; pomoRunning=false;
+        const tp=pomoPhase, task=tasks.find(t=>t.id===parseInt(pomoSel));
+        pomoSess.push({date:todayStr(),task:task?task.title:"Foco geral",tp});
+        pomoPhase = tp==="focus"?"break":"focus";
+        if(tp==="focus") pomoCycle++;
+        pomoSec = pomoPhase==="focus"?25*60:5*60;
+        save(); checkAch();
+      }
+      if(curPage==="pomodoro") renderPomodoro();
+    }, 1000);
+  }
+  if(curPage==="pomodoro") renderPomodoro();
+}
+function pomoReset() { clearInterval(pomoTimer); pomoTimer=null; pomoRunning=false; pomoSec=25*60; pomoPhase="focus"; pomoCycle=0; if(curPage==="pomodoro")renderPomodoro(); }
+function pomoSkip() { clearInterval(pomoTimer); pomoTimer=null; pomoRunning=false; pomoPhase=pomoPhase==="focus"?"break":"focus"; pomoSec=pomoPhase==="focus"?25*60:5*60; if(curPage==="pomodoro")renderPomodoro(); }
+
+// ─── PAGE: PROVAS ──────────────────────────────────────────────────────────
+function renderProvas() {
+  const now=new Date(); now.setHours(0,0,0,0);
+  const avgs=gRows.map(r=>{const ns=[r.n1,r.n2,r.n3].map(n=>parseFloat(n)).filter(n=>!isNaN(n));return ns.length?ns.reduce((a,b)=>a+b,0)/ns.length:null;}).filter(a=>a!==null);
+  const overall=avgs.length?avgs.reduce((a,b)=>a+b,0)/avgs.length:null;
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Provas e Medias</div>
+<div class="page-sub">Countdown e calculadora de medias</div>
+<div class="toolbar"><button class="btn btn-pk" onclick="openModal('examModal')">+ Adicionar prova</button></div>
+<div class="exam-grid">
+  ${exams.length===0?`<div style="color:var(--mu);font-size:.8rem;grid-column:1/-1;padding:7px">Nenhuma prova cadastrada</div>`:
+    exams.map(e=>{
+      const ed=new Date(e.date+"T00:00:00"),diff=Math.round((ed-now)/864e5);
+      const col=sCol(e.subj);
+      let numHtml="";
+      if(diff<0)numHtml=`<div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--mu)">Realizada</div>`;
+      else if(diff===0)numHtml=`<div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--red)">HOJE!</div>`;
+      else{const c=diff<=3?"var(--red)":diff<=7?"var(--gold)":"var(--pk)";numHtml=`<div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:${c}">${diff}</div><div style="font-size:.66rem;color:var(--mu)">dia${diff!==1?"s":""}</div>`;}
+      const bw=diff>0?Math.max(4,Math.min(100,100-diff*2)):100;
+      return`<div class="card" style="border-left:4px solid ${col}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:5px;margin-bottom:3px">
+          <div style="font-size:.82rem;font-weight:700;color:var(--tx)">${esc(e.subj)}</div>
+          <button onclick="delExam(${e.id})" style="background:none;border:none;cursor:pointer;font-size:.74rem;color:#d06080;opacity:.34;padding:0">X</button>
+        </div>
+        <div style="font-size:.69rem;color:var(--mu);margin-bottom:5px">${new Date(e.date+"T00:00:00").toLocaleDateString("pt-BR")}${e.desc?" - "+esc(e.desc):""}</div>
+        ${numHtml}
+        <div style="margin-top:5px;height:5px;background:var(--pk1);border-radius:99px;overflow:hidden">
+          <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pk3),var(--pk));width:${diff<0?100:bw}%;transition:width .5s"></div>
+        </div>
+      </div>`;}).join("")}
+</div>
+<div class="sec-title">Calculadora de Medias</div>
+<div class="card">
+  <table class="grade-table">
+    <thead><tr>${["Materia","Nota 1","Nota 2","Nota 3","Media"].map(h=>`<th>${h}</th>`).join("")}</tr></thead>
+    <tbody>
+      ${gRows.map(r=>{const ns=[r.n1,r.n2,r.n3].map(n=>parseFloat(n)).filter(n=>!isNaN(n));const avg=ns.length?ns.reduce((a,b)=>a+b,0)/ns.length:null;return`<tr>
+        <td><input value="${esc(r.subj)}" oninput="updGR(${r.id},'subj',this.value)" placeholder="Materia" style="width:78px"><button onclick="delGR(${r.id})" style="background:none;border:none;cursor:pointer;color:#d06080;font-size:.77rem;margin-left:3px">X</button></td>
+        ${["n1","n2","n3"].map(f=>`<td><input value="${r[f]}" oninput="updGR(${r.id},'${f}',this.value)" type="number" min="0" max="10" step="0.1" style="width:56px;text-align:center"></td>`).join("")}
+        <td>${avg!==null?`<span style="font-weight:700;color:${avg>=7?"var(--mint)":avg>=5?"var(--gold)":"var(--red)"}">${avg.toFixed(1)}</span>`:"-"}</td>
+      </tr>`;}).join("")}
+    </tbody>
+  </table>
+  <div class="toolbar" style="margin-bottom:9px"><button class="btn btn-gh btn-sm" onclick="addGR()">+ Materia</button></div>
+  ${overall!==null?`<div style="display:flex;gap:8px;flex-wrap:wrap">
+    ${[{n:overall.toFixed(1),l:"Media Geral",c:overall>=7?"var(--mint)":overall>=5?"var(--gold)":"var(--red)"},{n:avgs.filter(a=>a>=7).length,l:"Aprovada",c:"var(--mint)"},{n:avgs.filter(a=>a>=5&&a<7).length,l:"Em risco",c:"var(--gold)"},{n:avgs.filter(a=>a<5).length,l:"Reprovada",c:"var(--red)"}].map(s=>`
+    <div style="background:var(--pk1);border:1.5px solid var(--pk2);border-radius:16px;padding:8px 11px;text-align:center;flex:1;min-width:85px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:600;line-height:1;color:${s.c}">${s.n}</div>
+      <div style="font-size:.67rem;color:var(--mu);margin-top:1px">${s.l}</div>
+    </div>`).join("")}
+  </div>`:""}
+</div>
+<div class="modal-bg" id="examModal">
+  <div class="modal">
+    <div class="modal-title">Nova Prova</div>
+    <input id="exSubj" class="field" placeholder="Materia..." style="margin-bottom:7px">
+    <input id="exDesc" class="field" placeholder="Descricao (opcional)" style="margin-bottom:7px">
+    <input id="exDate" class="field" type="date" style="margin-bottom:7px">
+    <div class="modal-foot">
+      <button class="btn btn-gh" onclick="closeModal('examModal')">Cancelar</button>
+      <button class="btn btn-pk" onclick="addExam()">Adicionar</button>
+    </div>
+  </div>
+</div>`;
+}
+function addExam() {
+  const subj=document.getElementById("exSubj").value.trim(),date=document.getElementById("exDate").value;
+  if(!subj||!date)return;
+  exams.push({id:Date.now(),subj,desc:document.getElementById("exDesc").value.trim(),date});
+  exams.sort((a,b)=>a.date.localeCompare(b.date));
+  save();checkAch();closeModal("examModal");render();
+}
+function delExam(id){exams=exams.filter(e=>e.id!==id);save();render();}
+function updGR(id,f,v){const r=gRows.find(x=>x.id===id);if(r){r[f]=v;save();}}
+function addGR(){gRows.push({id:Date.now()+Math.random(),subj:"",n1:"",n2:"",n3:""});save();render();}
+function delGR(id){gRows=gRows.filter(r=>r.id!==id);save();render();}
+
+// ─── PAGE: NOTAS ──────────────────────────────────────────────────────────
+function renderNotas() {
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Notas</div>
+<div class="page-sub">Anote dificuldades, insights e duvidas</div>
+<div class="toolbar"><button class="btn btn-pk" onclick="openModal('notaModal')">+ Nova nota</button></div>
+<div class="notes-grid">
+  ${notes.length===0?`<div style="color:var(--mu);font-size:.82rem;padding:16px;text-align:center">Nenhuma nota ainda</div>`:
+    notes.map(n=>`<div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:5px;margin-bottom:4px">
+        <div style="font-size:.68rem;font-weight:700;color:var(--pk);text-transform:uppercase;letter-spacing:.8px">${esc(n.subj)}</div>
+        <button onclick="delNota(${n.id})" style="background:none;border:none;cursor:pointer;font-size:.73rem;color:#d06080;opacity:.34;padding:0">X</button>
+      </div>
+      <div style="font-size:.63rem;color:var(--mu);margin-bottom:4px">${n.date}${n.title?" - "+esc(n.title):""}</div>
+      <div style="font-size:.77rem;color:var(--tx);line-height:1.52;font-style:italic;word-break:break-word">${esc(n.text)}</div>
+    </div>`).join("")}
+</div>
+<div class="modal-bg" id="notaModal">
+  <div class="modal">
+    <div class="modal-title">Nova Nota</div>
+    <div class="frow">
+      <input id="notaSubj" class="field" placeholder="Materia">
+      <input id="notaTit" class="field" placeholder="Titulo (opcional)">
+    </div>
+    <textarea id="notaTxt" class="field" placeholder="Sua anotacao..."></textarea>
+    <div class="modal-foot">
+      <button class="btn btn-gh" onclick="closeModal('notaModal')">Cancelar</button>
+      <button class="btn btn-pk" onclick="addNota()">Salvar</button>
+    </div>
+  </div>
+</div>`;
+}
+function addNota(){
+  const text=document.getElementById("notaTxt").value.trim();if(!text)return;
+  notes.unshift({id:Date.now(),subj:document.getElementById("notaSubj").value.trim()||"Geral",title:document.getElementById("notaTit").value.trim(),text,date:todayStr()});
+  save();checkAch();closeModal("notaModal");render();
+}
+function delNota(id){notes=notes.filter(n=>n.id!==id);save();render();}
+
+// ─── PAGE: ANKI ────────────────────────────────────────────────────────────
+function renderAnki() {
+  const td=todayStr();
+  const total=ankiLogs.length,pend=ankiLogs.reduce((a,l)=>a+l.reviews.filter(r=>!r.done&&r.date<=td).length,0);
+  const dn=ankiLogs.reduce((a,l)=>a+l.reviews.filter(r=>r.done).length,0),tot=ankiLogs.reduce((a,l)=>a+l.reviews.length,0);
+  const bySub={};ankiLogs.forEach(l=>{if(!bySub[l.subj])bySub[l.subj]=[];bySub[l.subj].push(l);});
+  const ACC=["#ec4899","#f59e0b","#34d399","#38bdf8","#a78bfa","#fb923c"];
+  const due=[];ankiLogs.forEach(log=>log.reviews.forEach((rv,i)=>{if(!rv.done&&rv.date<=td)due.push({log,i});}));
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Revisoes Anki</div>
+<div class="page-sub">+1d, +3d, +7d, +14d, +30d</div>
+<div class="stats-grid">
+  ${[{n:total,l:"Registrados",c:"var(--pk)"},{n:pend,l:"Pendentes",c:pend?"var(--gold)":"var(--pk)"},{n:dn,l:"Feitas",c:"var(--mint)"},{n:tot?Math.round(dn/tot*100)+"%":"0%",l:"Taxa",c:"var(--pk)"}].map(s=>`
+  <div class="stat-card"><div class="stat-num" style="color:${s.c}">${s.n}</div><div class="stat-lbl">${s.l}</div></div>`).join("")}
+</div>
+${!ankiLogs.length?`<div style="color:var(--mu);font-size:.81rem;padding:8px">Nenhum conteudo registrado ainda</div>`:""}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;margin-bottom:15px">
+  ${Object.entries(bySub).map(([subj,logs],si)=>{const log=logs[0];return`<div class="card" style="border-top:3px solid ${ACC[si%ACC.length]}">
+    <div style="font-size:.83rem;font-weight:700;color:var(--tx);margin-bottom:2px">${subj}</div>
+    <div style="font-size:.66rem;color:var(--mu);margin-bottom:5px">${log.logDate}</div>
+    <div class="sr-pills">
+      ${SR.map((d,i)=>{const rv=log.reviews[i];let cls="fu",lbl="+"+d+"d",click="";if(rv.done){cls="dn";}else if(rv.date<td){cls="ov";click=`onclick="markSR('${log.logDate}','${subj}',${i})"`;}else if(rv.date===td){cls="du";lbl="Hoje";click=`onclick="markSR('${log.logDate}','${subj}',${i})"`;} return`<span class="sr-pill ${cls}" ${click} title="${rv.date}">${lbl}</span>`;}).join("")}
+    </div>
+  </div>`;}).join("")}
+</div>
+${due.length?`<div class="sec-title">Revisoes para agora</div>
+<div class="tgrid">
+  ${due.map(({log,i})=>`<div class="card">
+    <div style="display:flex;gap:8px;align-items:center">
+      <div onclick="markSR('${log.logDate}','${esc(log.subj)}',${i})" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--bd);background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer"></div>
+      <div>
+        <div style="font-size:.83rem;font-weight:600;color:var(--tx)">${esc(log.subj)}</div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">
+          <span class="tag" style="background:var(--goldb);border-color:var(--gold);color:#7a4010">Rev. ${i+1}/${SR.length}</span>
+          <span class="tag t-time">${log.reviews[i].date}</span>
+          ${log.reviews[i].date<td?`<span class="tag" style="background:var(--redl);border-color:#fca5a5;color:#b91c1c">Atrasada</span>`:""}
+        </div>
+      </div>
+    </div>
+  </div>`).join("")}
+</div>`:`${ankiLogs.length?`<div style="color:var(--mu);font-size:.81rem;padding:7px">Nenhuma revisao pendente!</div>`:""}`}`;
+}
+function markSR(ld,subj,idx){
+  const log=ankiLogs.find(l=>l.logDate===ld&&l.subj===subj);
+  if(!log)return;log.reviews[idx].done=true;save();render();
+}
+
+// ─── PAGE: CONQUISTAS ─────────────────────────────────────────────────────
+function renderConquistas() {
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Conquistas</div>
+<div class="page-sub">Desbloqueie selos a medida que avanca</div>
+<div class="ach-grid">
+  ${ACH_DEF.map(a=>{const u=unlockedAch.has(a.id);return`<div class="card" style="border:1.5px solid ${u?"var(--gold)":"var(--bd)"};text-align:center;opacity:${u?1:.42};filter:${u?"none":"grayscale(.7)"};position:relative;overflow:hidden">
+    ${u?`<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--goldl),var(--gold),var(--goldl))"></div>`:""}
+    ${u?`<div style="position:absolute;top:5px;right:6px;font-size:.59rem;background:var(--goldl);color:#7a4010;border-radius:99px;padding:1px 5px;font-weight:700">OK</div>`:""}
+    <div style="font-size:1.7rem;margin-bottom:4px">*</div>
+    <div style="font-size:.75rem;font-weight:700;color:var(--tx);margin-bottom:2px">${a.name}</div>
+    <div style="font-size:.63rem;color:var(--mu);line-height:1.38">${a.desc}</div>
+  </div>`;}).join("")}
+</div>`;
+}
+
+// ─── PAGE: HISTORICO ──────────────────────────────────────────────────────
+function renderHistorico() {
+  const td=todayStr();
+  let strk=0;const dt=new Date();dt.setHours(0,0,0,0);
+  while(true){const ds=dt.toISOString().split("T")[0];if(studyLog[ds]&&studyLog[ds]>0){strk++;dt.setDate(dt.getDate()-1);}else break;}
+  const days=168;const start=new Date();start.setHours(0,0,0,0);start.setDate(start.getDate()-days);
+  const cells=[];for(let i=0;i<=days;i++){const d=new Date(start);d.setDate(d.getDate()+i);const ds=d.toISOString().split("T")[0];cells.push({date:ds,count:studyLog[ds]||0,isToday:ds===td});}
+  const fd=new Date(cells[0].date+"T00:00:00").getDay();
+  const padded=[...Array(fd).fill(null),...cells];
+  const weeks=[];for(let i=0;i<padded.length;i+=7)weeks.push(padded.slice(i,i+7));
+  const lvlCol=["var(--pk1)","#fce7f3","#fbcfe8","#f9a8d4","#ec4899","#be185d"];
+  const moodEntries=Object.entries(moodLog).sort().slice(-30);
+  document.getElementById("mainContent").innerHTML = `
+<div class="page-title">Historico</div>
+<div class="page-sub">Sua consistencia ao longo dos meses</div>
+<div class="card" style="margin-bottom:12px">
+  <div style="font-size:.73rem;font-weight:600;color:var(--mu);margin-bottom:7px;letter-spacing:.3px">DIAS DE ESTUDO</div>
+  <div class="hm-scroll">
+    <div style="display:flex;gap:3px;min-width:max-content">
+      ${weeks.map(week=>`<div style="display:flex;flex-direction:column;gap:3px">
+        ${Array.from({length:7},(_,di)=>{const cell=week[di];if(!cell)return`<div style="width:11px;height:11px"></div>`;const lvl=cell.count===0?0:cell.count<=1?1:cell.count<=2?2:cell.count<=4?3:cell.count<=6?4:5;return`<div style="width:11px;height:11px;border-radius:2px;background:${lvlCol[lvl]};${cell.isToday?"outline:2px solid var(--pk);outline-offset:1px;":""}" title="${cell.date}: ${cell.count} tarefas"></div>`;}).join("")}
+      </div>`).join("")}
+    </div>
+  </div>
+</div>
+<div class="stats-grid">
+  ${[{n:strk,l:"Sequencia"},{n:Object.keys(studyLog).length,l:"Dias"},{n:Object.values(done).filter(Boolean).length,l:"Tarefas"},{n:pomoSess.filter(s=>s.date===td&&s.tp==="focus").length,l:"Pomodoros"},{n:quizDone,l:"Quizzes"}].map(s=>`
+  <div class="stat-card"><div class="stat-num">${s.n}</div><div class="stat-lbl">${s.l}</div></div>`).join("")}
+</div>
+<div class="sec-title">Historico de Humor</div>
+${moodEntries.length===0?`<div style="color:var(--mu);font-size:.8rem">Nenhum humor registrado ainda</div>`:
+`<div style="display:flex;gap:4px;flex-wrap:wrap">
+  ${moodEntries.map(([date,m])=>`<div title="${date}: ${m}" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;border:1.5px solid var(--bd);background:var(--pk1);cursor:default">${m.charAt(0)}</div>`).join("")}
+</div>`}`;
+}
+
+// ─── BACKGROUND CANVAS ────────────────────────────────────────────────────
+(function(){
+  const cv=document.getElementById("bgCanvas"),cx=cv.getContext("2d");
+  let W,H,items=[];
+  const SH=["rgba(255,182,215,","rgba(255,150,193,","rgba(236,72,153,","rgba(255,214,232,","rgba(252,231,243,"];
+  const resize=()=>{W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;};
+  const heart=(x,y,s,a,c)=>{cx.save();cx.globalAlpha=a;cx.fillStyle=c;cx.beginPath();cx.moveTo(x,y+s*.3);cx.bezierCurveTo(x,y,x-s,y,x-s,y-s*.4);cx.bezierCurveTo(x-s,y-s,x,y-s,x,y-s*.5);cx.bezierCurveTo(x,y-s,x+s,y-s,x+s,y-s*.4);cx.bezierCurveTo(x+s,y,x,y,x,y+s*.3);cx.fill();cx.restore();};
+  const flower=(x,y,s,a,c)=>{cx.save();cx.globalAlpha=a;for(let i=0;i<5;i++){const ag=(i/5)*Math.PI*2,px=x+Math.cos(ag)*s*.55,py=y+Math.sin(ag)*s*.55;cx.fillStyle=c;cx.beginPath();cx.ellipse(px,py,s*.44,s*.27,ag,0,Math.PI*2);cx.fill();}cx.fillStyle="#fff5f9";cx.beginPath();cx.arc(x,y,s*.24,0,Math.PI*2);cx.fill();cx.restore();};
+  const bow=(x,y,s,a,c)=>{cx.save();cx.globalAlpha=a;cx.fillStyle=c;cx.beginPath();cx.moveTo(x,y);cx.bezierCurveTo(x-s*.3,y-s*.6,x-s,y-s*.5,x-s,y-s*.1);cx.bezierCurveTo(x-s,y+s*.4,x-s*.3,y+s*.3,x,y);cx.fill();cx.beginPath();cx.moveTo(x,y);cx.bezierCurveTo(x+s*.3,y-s*.6,x+s,y-s*.5,x+s,y-s*.1);cx.bezierCurveTo(x+s,y+s*.4,x+s*.3,y+s*.3,x,y);cx.fill();cx.fillStyle="#ec4899";cx.globalAlpha=Math.min(1,a*1.3);cx.beginPath();cx.arc(x,y,s*.16,0,Math.PI*2);cx.fill();cx.restore();};
+  const mk=()=>{const tp=["heart","heart","flower","bow"];return{tp:tp[Math.floor(Math.random()*tp.length)],x:Math.random()*W,y:Math.random()*H,s:7+Math.random()*15,a:.04+Math.random()*.08,col:SH[Math.floor(Math.random()*SH.length)]+"1)",sp:.09+Math.random()*.18,dr:(Math.random()-.5)*.11,ph:Math.random()*Math.PI*2};};
+  const draw=(t)=>{
+    const g=cx.createLinearGradient(0,0,W,H);g.addColorStop(0,"#ffd6e8");g.addColorStop(.5,"#ffb3d1");g.addColorStop(1,"#ffd6e8");cx.fillStyle=g;cx.fillRect(0,0,W,H);
+    items.forEach(it=>{const wb=Math.sin(t*.001+it.ph)*2,x=it.x+wb;if(it.tp==="heart")heart(x,it.y,it.s,it.a,it.col);else if(it.tp==="flower")flower(x,it.y,it.s,it.a,it.col);else bow(x,it.y,it.s,it.a,it.col);it.y-=it.sp;it.x+=it.dr;if(it.y<-40){it.y=H+30;it.x=Math.random()*W;}if(it.x<-40)it.x=W+30;if(it.x>W+40)it.x=-30;});
+    requestAnimationFrame(draw);
+  };
+  window.addEventListener("resize",resize);resize();items=Array.from({length:52},mk);requestAnimationFrame(draw);
+})();
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+loadSem();
+buildNav();
+render();
+</script>
+</body>
+</html>
